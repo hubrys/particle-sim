@@ -1,5 +1,17 @@
 #include "./Config.h"
 
+Config* Config::_instance;
+
+Config* Config::instance()
+{
+    return _instance;
+}
+
+void Config::setGlobalInstance(Config* config)
+{
+    _instance = config;
+}
+
 bool Config::init(const std::string& path)
 {
     std::ifstream file(path);
@@ -47,6 +59,16 @@ int Config::getInt(const std::string& key, int def) const
 	return std::stoi(it->second);
 }
 
+float Config::getFloat(const std::string& key, int defaultValue) const
+{
+    auto it = _values.find(key);
+    if (it == _values.end())
+    {
+        return defaultValue;
+    }
+    return std::stof(it->second);
+}
+
 const std::string& Config::getString(const std::string& key, const std::string& def) const
 {
 	auto it = _values.find(key);
@@ -55,4 +77,9 @@ const std::string& Config::getString(const std::string& key, const std::string& 
 		return def;
 	}
 	return it->second;
+}
+
+void Config::setString(const std::string& key, const std::string& value)
+{
+    _values[std::string(key)] = std::string(value);
 }

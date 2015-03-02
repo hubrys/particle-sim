@@ -1,2 +1,4 @@
 windowWidth=640
 windowHeight=480
+particleCount=100
+gravConst=4

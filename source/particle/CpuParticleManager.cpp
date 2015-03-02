@@ -6,25 +6,41 @@ CpuParticleManager::~CpuParticleManager()
 	delete[] _particles;
 }
 
-const char* CpuParticleManager::init(const std::string& assetRoot, int dim, glm::vec3 bounds, bool threeDimensional)
+const char* CpuParticleManager::init()
 {
+    _gravConst = Config::instance()->getFloat("gravConst");
+    _particleCount = Config::instance()->getInt("particleCount");
+    int dim = std::sqrt(_particleCount);
+
     // Initialize particle array
     _particleCount = dim * dim;
-	_particles = new CpuParticle[_particleCount];
+    _particles = new CpuParticle[_particleCount];
 
-    float xOffset = 2.f / dim;
-    float yOffset = 2.f / dim;
+    float width = Config::instance()->getFloat("windowWidth");
+    float height = Config::instance()->getFloat("windowHeight");
+
+    float xStep = width / dim;
+    float yStep = height / dim;
+
+    float xOffset = width / 2.f;
+    float yOffset = height / 2.f;
+
+    float xScale = 2 / width;
+    float yScale = 2 / height;
+
+    _scale = xScale < yScale ? xScale : yScale;
 
     for (int yI = 0; yI < dim; yI++) 
     {
         for (int xI = 0; xI < dim; xI++)
         {
-            _particles[yI * dim + xI] = CpuParticle(glm::vec2(xOffset * xI - 1.f, yOffset * yI - 1.f),
+            _particles[yI * dim + xI] = CpuParticle(glm::vec2(xStep * xI - xOffset, yStep * yI - yOffset),
                                                     glm::vec2(0));
         }
     }
 
     // Setup OpenGL values
+    std::string assetRoot = Config::instance()->getString("assetRoot");
     _program = Program::createProgram(assetRoot + "shaders/simulation.vert",
                                       assetRoot + "shaders/simulation.frag");
     if (_program == nullptr)
@@ -32,6 +48,8 @@ const char* CpuParticleManager::init(const std::string& assetRoot, int dim, glm:
         return "CpuParticleManager: could not create program";
     }
     _program->setActive();
+
+    _d_scale = _program->getUniform("scale");
 
     glGenVertexArrays(1, &_d_vao);
     glBindVertexArray(_d_vao);
@@ -54,12 +72,37 @@ const char* CpuParticleManager::init(const std::string& assetRoot, int dim, glm:
 
 void CpuParticleManager::tick(float deltaTime)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _particleCount * sizeof(CpuParticle), _particles);
+    for (int particleI = 0; particleI < _particleCount; particleI++)
+    {
+        CpuParticle* particle = &_particles[particleI];
+
+        for (int otherParticleI = 0; otherParticleI < _particleCount; otherParticleI++)
+        {
+            if (particleI == otherParticleI)
+            {
+                continue;
+            }
+            
+            glm::vec2 diff = _particles[otherParticleI].position /*glm::vec2(0, 0)*/ - particle->position;
+            float distance = glm::length(diff);
+            float force = _gravConst / (distance * distance);
+            particle->velocity += force * glm::normalize(diff);
+        }
+    }
+
+    for (int particleI = 0; particleI < _particleCount; particleI++)
+    {
+        _particles[particleI].position += _particles[particleI].velocity * deltaTime;
+    }
 }
 
 void CpuParticleManager::render()
 {
+    glUniform1f(_d_scale, _scale);
+    // transfer data to GPU 
+    glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, _particleCount * sizeof(CpuParticle), _particles);
+
     glBindVertexArray(_d_vao);
     glDrawArrays(GL_POINTS, 0, _particleCount);
 }

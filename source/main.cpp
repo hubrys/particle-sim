@@ -9,6 +9,9 @@ int main(int argc, char** argv)
 	}
 
 	std::string root = std::string(argv[1]);
-	Simulation simulation = Simulation();
-	simulation.execute(root);
+	Config config = Config::fromFile(root + "config.txt");
+	config.setString("assetRoot", root);
+	Config::setGlobalInstance(&config);
+
+	Simulation().execute();
 }

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <glm/vec2.hpp>
+#include <cmath>
+#include <glm/glm.hpp>
 
 #include "../rendering/Program.h"
 #include "./IParticleManager.h"
@@ -24,8 +25,7 @@ class CpuParticleManager
 {	
 public:
 	~CpuParticleManager();
-	virtual const char* init(const std::string& assestRoot, int dim, 
-		glm::vec3 bounds, bool threeDimensional);
+	virtual const char* init();
 	virtual void tick(float deltaTime);
 	virtual void render();
 
@@ -33,7 +33,11 @@ private:
 	int _particleCount;
 	CpuParticle* _particles;
 
+	float _gravConst;
+	float _scale;
+
 	Program* _program;
 	GLuint _d_vao;
 	GLuint _d_particleBuffer;
+	GLuint _d_scale;
 };

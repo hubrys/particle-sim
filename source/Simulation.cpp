@@ -9,11 +9,9 @@ Simulation::~Simulation()
 	glfwTerminate();
 }
 
-void Simulation::execute(const std::string& root)
+void Simulation::execute()
 {
-	Config config = Config::fromFile(root + "config.txt");
-
-	const char* result = init(root, config);
+	const char* result = init();
 
 	if (result != nullptr) 
 	{
@@ -23,7 +21,7 @@ void Simulation::execute(const std::string& root)
 
 	using namespace std::chrono;
 
-	glPointSize(2.f);
+	glPointSize(4.f);
 	_running = true;
 
 	Timer timer;
@@ -39,7 +37,7 @@ void Simulation::execute(const std::string& root)
 	}
 }
 
-const char* Simulation::init(const std::string& assetRoot, const Config& config)
+const char* Simulation::init()
 {
 	// initialize glfw and window
 	if (glfwInit() == false) 
@@ -47,8 +45,8 @@ const char* Simulation::init(const std::string& assetRoot, const Config& config)
 		return "failed to initialize glfw";
 	}
 
-	int width = config.getInt("windowWidth");
-	int height = config.getInt("windowHeight");
+	int width = Config::instance()->getInt("windowWidth");
+	int height = Config::instance()->getInt("windowHeight");
 
 	_window = glfwCreateWindow(width, height, "Particle Simulation", nullptr, nullptr);
 	if (_window == nullptr) 
@@ -67,8 +65,10 @@ const char* Simulation::init(const std::string& assetRoot, const Config& config)
 	}
 	printf("glsl version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+	float gravConst = Config::instance()->getFloat("gravConst", 1);
+
 	_manager = new CpuParticleManager();
-	const char* result = _manager->init(assetRoot, 100, glm::vec3(100, 100, 0));
+	const char* result = _manager->init();
 	if (result != nullptr)
 	{
 		return result;
