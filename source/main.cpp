@@ -1,8 +1,14 @@
 #include "./Simulation.h"
 
-int main() 
+int main(int argc, char** argv) 
 {
-	Config config = Config::fromFile("assets/config.txt");
+	if (argc <= 1)
+	{
+		printf("no asset folder defined\n");
+		return 0;
+	}
+
+	std::string root = std::string(argv[1]);
 	Simulation simulation = Simulation();
-	simulation.execute(config);
+	simulation.execute(root);
 }

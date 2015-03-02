@@ -21,11 +21,12 @@ struct CpuParticle
 
 class CpuParticleManager 
 	: public IParticleManager
-{
+{	
 public:
 	~CpuParticleManager();
-	virtual const char* init(int dim, glm::vec3 bounds, bool threeDimensional);
-	virtual void tick(long deltaTime);
+	virtual const char* init(const std::string& assestRoot, int dim, 
+		glm::vec3 bounds, bool threeDimensional);
+	virtual void tick(float deltaTime);
 	virtual void render();
 
 private:

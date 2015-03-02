@@ -6,7 +6,7 @@ CpuParticleManager::~CpuParticleManager()
 	delete[] _particles;
 }
 
-const char* CpuParticleManager::init(int dim, glm::vec3 bounds, bool threeDimensional)
+const char* CpuParticleManager::init(const std::string& assetRoot, int dim, glm::vec3 bounds, bool threeDimensional)
 {
     // Initialize particle array
     _particleCount = dim * dim;
@@ -25,8 +25,8 @@ const char* CpuParticleManager::init(int dim, glm::vec3 bounds, bool threeDimens
     }
 
     // Setup OpenGL values
-    _program = Program::createProgram("assets/shaders/simulation.vert",
-                                      "assets/shaders/simulation.frag");
+    _program = Program::createProgram(assetRoot + "shaders/simulation.vert",
+                                      assetRoot + "shaders/simulation.frag");
     if (_program == nullptr)
     {
         return "CpuParticleManager: could not create program";
@@ -44,15 +44,15 @@ const char* CpuParticleManager::init(int dim, glm::vec3 bounds, bool threeDimens
 
     GLuint d_vPosition = _program->getAttribute("vPosition");
     printf("position of vposition: %d\n", d_vPosition);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(d_vPosition, 3, GL_FLOAT, GL_FALSE, 2, 0);
+    glEnableVertexAttribArray(d_vPosition);
+    glVertexAttribPointer(d_vPosition, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 
     glBindVertexArray(0);
 
     return nullptr;
 }
 
-void CpuParticleManager::tick(long deltaTime)
+void CpuParticleManager::tick(float deltaTime)
 {
     glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _particleCount * sizeof(CpuParticle), _particles);

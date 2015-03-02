@@ -19,7 +19,7 @@ find_package(GLEW REQUIRED)
 add_subdirectory(ext-deps/glfw-3.1)
 
 include_directories(
-	GLEW_INCLUDE_DIRS
+	${GLEW_INCLUDE_DIRS}
 	ext-deps/glfw-3.1/include
 	ext-deps/glm
 )
@@ -28,8 +28,6 @@ set(PARTICLE_LIBS
 	${GLEW_LIBRARIES}
 	glfw
 	${GLFW_LIBRARIES})
-
-#Options
 
 set(PARTICLE_SRC	
 	source/main.cpp
@@ -45,10 +43,7 @@ if(NOT MSVC)
 	set_target_properties(particle_sim PROPERTIES
   		COMPILE_FLAGS "-std=c++11"
 	)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${GLEW_INCLUDE_DIRS}")
 endif()
-
-configure_file(assets/config.txt assets/config.txt NEWLINE_STYLE UNIX)
-configure_file(assets/shaders/simulation.vert assets/shaders/simulation.vert NEWLINE_STYLE UNIX)
-configure_file(assets/shaders/simulation.frag assets/shaders/simulation.frag NEWLINE_STYLE UNIX)
 
 source_group(source FILES ${PARTICLE_SRC})

@@ -9,7 +9,7 @@ class Simulation
 {
 public:
 	~Simulation();
-	void execute(const Config& config);
+	void execute(const std::string& assetPath);
 
 private:
 	GLFWwindow* _window;
@@ -17,6 +17,5 @@ private:
 	bool _running;
 	IParticleManager* _manager;
 
-	const char* init(const Config& config);
-
+	const char* init(const std::string& assetRoot, const Config& config);
 };

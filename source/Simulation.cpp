@@ -1,14 +1,19 @@
 #include "./Simulation.h"
 
+#include <chrono>
+#include "./Timer.h"
+
 Simulation::~Simulation()
 {
 	delete _manager;
 	glfwTerminate();
 }
 
-void Simulation::execute(const Config& config)
+void Simulation::execute(const std::string& root)
 {
-	const char* result = init(config);
+	Config config = Config::fromFile(root + "config.txt");
+
+	const char* result = init(root, config);
 
 	if (result != nullptr) 
 	{
@@ -16,16 +21,25 @@ void Simulation::execute(const Config& config)
 		return;
 	}
 
+	using namespace std::chrono;
+
+	glPointSize(2.f);
 	_running = true;
+
+	Timer timer;
+	timer.reset();
 	while(glfwWindowShouldClose(_window) == false && _running) 
 	{
-		_manager->tick(100);
+		glClear(GL_COLOR_BUFFER_BIT);
+		_manager->tick(timer.lap());
 		_manager->render();
+		glfwSwapBuffers(_window);
+
 		glfwPollEvents();
 	}
 }
 
-const char* Simulation::init(const Config& config)
+const char* Simulation::init(const std::string& assetRoot, const Config& config)
 {
 	// initialize glfw and window
 	if (glfwInit() == false) 
@@ -36,7 +50,7 @@ const char* Simulation::init(const Config& config)
 	int width = config.getInt("windowWidth");
 	int height = config.getInt("windowHeight");
 
-	_window = glfwCreateWindow(width, height, "Paritcle Simulation", nullptr, nullptr);
+	_window = glfwCreateWindow(width, height, "Particle Simulation", nullptr, nullptr);
 	if (_window == nullptr) 
 	{
 		return "failed to create window";
@@ -45,6 +59,7 @@ const char* Simulation::init(const Config& config)
 	glfwMakeContextCurrent(_window);
 
 	// initialize glew
+	glewExperimental = GL_TRUE; 
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
@@ -53,7 +68,7 @@ const char* Simulation::init(const Config& config)
 	printf("glsl version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	_manager = new CpuParticleManager();
-	const char* result = _manager->init(100, glm::vec3(100, 100, 0));
+	const char* result = _manager->init(assetRoot, 100, glm::vec3(100, 100, 0));
 	if (result != nullptr)
 	{
 		return result;
