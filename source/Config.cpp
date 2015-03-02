@@ -20,18 +20,24 @@ bool Config::init(const std::string& path)
         return false;
     }
 
+    std::string line;
     std::string key;
     std::string value;
     while (file.eof() == false)
     {
-        std::getline(file, key, '=');
-        std::getline(file, value, '\n');
+        std::getline(file, line, '\n');
+        // std::getline(file, value, '\n');
+        if (line[0] == '#') {
+            continue;
+        }
 
-		if (key.size() == 0)
-		{
-			continue;
-		}
-        _values[std::string(key)] = std::string(value);
+        int index = line.find_first_of('=');
+        if (index == std::string::npos) 
+        {
+            continue;
+        }
+
+        _values[line.substr(0, index)] = line.substr(index + 1);
     }
     file.close();
     return true;

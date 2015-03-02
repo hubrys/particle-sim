@@ -35,7 +35,9 @@ set(PARTICLE_SRC
 	source/Simulation.cpp
 	source/rendering/Program.cpp
 	source/rendering/Shader.cpp
-	source/particle/CpuParticleManager.cpp)
+	source/particle/CpuParticleManager.cpp
+	source/particle/SteppedCpuParticleManager.cpp
+	)
 
 add_executable(particle_sim ${PARTICLE_SRC})
 target_link_libraries(particle_sim ${PARTICLE_LIBS})

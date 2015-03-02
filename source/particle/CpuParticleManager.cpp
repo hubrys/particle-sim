@@ -82,8 +82,8 @@ void CpuParticleManager::tick(float deltaTime)
             {
                 continue;
             }
-            
-            glm::vec2 diff = _particles[otherParticleI].position /*glm::vec2(0, 0)*/ - particle->position;
+
+            glm::vec2 diff = _particles[otherParticleI].position - particle->position;
             float distance = glm::length(diff);
             float force = _gravConst / (distance * distance);
             particle->velocity += force * glm::normalize(diff);

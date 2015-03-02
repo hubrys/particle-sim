@@ -67,7 +67,16 @@ const char* Simulation::init()
 
 	float gravConst = Config::instance()->getFloat("gravConst", 1);
 
-	_manager = new CpuParticleManager();
+	std::string managerType = Config::instance()->getString("particleManager", "cpu");
+	if (managerType == "cpu")
+	{
+		_manager = new CpuParticleManager();
+	} 
+	else if (managerType == "cpuStepped") 
+	{
+		_manager = new SteppedCpuParticleManager();
+	}
+	
 	const char* result = _manager->init();
 	if (result != nullptr)
 	{

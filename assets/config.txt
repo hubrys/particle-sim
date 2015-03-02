@@ -1,4 +1,8 @@
+#windowWidth
 windowWidth=640
 windowHeight=480
-particleCount=100
-gravConst=4
+particleCount=1000
+gravConst=30
+
+# managerTypes: cpu, cpuStepped
+particleManager=cpuStepped

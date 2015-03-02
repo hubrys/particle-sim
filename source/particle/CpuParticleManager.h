@@ -29,7 +29,7 @@ public:
 	virtual void tick(float deltaTime);
 	virtual void render();
 
-private:
+protected:
 	int _particleCount;
 	CpuParticle* _particles;
 
