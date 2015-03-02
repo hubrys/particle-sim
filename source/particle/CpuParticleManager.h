@@ -35,6 +35,7 @@ protected:
 
 	float _gravConst;
 	float _scale;
+	float _minCalcDistance;
 
 	Program* _program;
 	GLuint _d_vao;

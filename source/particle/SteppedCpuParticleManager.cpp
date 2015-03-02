@@ -10,7 +10,7 @@ void SteppedCpuParticleManager::tick(float deltaTime)
         {
             glm::vec2 diff = _particles[otherParticleI].position - particle->position;
             float distance = glm::length(diff);
-            float force = _gravConst / (distance * distance);
+            float force = _gravConst / ((distance * distance) + _minCalcDistance);
             diff = force * glm::normalize(diff);
             particle->velocity += diff;
             _particles[otherParticleI].velocity -= diff;

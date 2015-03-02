@@ -2,7 +2,7 @@
 windowWidth=640
 windowHeight=480
 particleCount=1000
-gravConst=30
-
+gravConst=10
+minCalcDistance=1
 # managerTypes: cpu, cpuStepped
 particleManager=cpuStepped

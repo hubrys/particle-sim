@@ -39,8 +39,10 @@ set(PARTICLE_SRC
 	source/particle/SteppedCpuParticleManager.cpp
 	)
 
+set(ENV{HUBRYS_NBODY_PATH} "more testing")
 add_executable(particle_sim ${PARTICLE_SRC})
 target_link_libraries(particle_sim ${PARTICLE_LIBS})
+
 if(NOT MSVC)
 	set_target_properties(particle_sim PROPERTIES
   		COMPILE_FLAGS "-std=c++11"

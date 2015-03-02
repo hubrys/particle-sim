@@ -8,8 +8,10 @@ CpuParticleManager::~CpuParticleManager()
 
 const char* CpuParticleManager::init()
 {
-    _gravConst = Config::instance()->getFloat("gravConst");
-    _particleCount = Config::instance()->getInt("particleCount");
+    _gravConst = Config::instance()->getFloat("gravConst", 10);
+    _particleCount = Config::instance()->getInt("particleCount", 100);
+    _minCalcDistance = Config::instance()->getFloat("minCalcDistance", 1);
+
     int dim = std::sqrt(_particleCount);
 
     // Initialize particle array
@@ -85,7 +87,7 @@ void CpuParticleManager::tick(float deltaTime)
 
             glm::vec2 diff = _particles[otherParticleI].position - particle->position;
             float distance = glm::length(diff);
-            float force = _gravConst / (distance * distance);
+            float force = _gravConst / ((distance * distance) + _minCalcDistance);
             particle->velocity += force * glm::normalize(diff);
         }
     }
