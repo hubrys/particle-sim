@@ -3,18 +3,18 @@ windowWidth=900
 windowHeight=600
 
 # render config
-glVersionMajor=1
-glVersionMinor=0
+glVersionMajor=4
+glVersionMinor=1
 pointSize=8
 #colorBy types: none, direction, velocity, both
-colorBy=direction
+colorBy=none
 
 # simulation config
-gravConst=100
+gravConst=1
 minCalcDistance=.1
 
 # particle config
-particleCount=1000
+particleCount=2000
 friction=.1
 
 # mouse config

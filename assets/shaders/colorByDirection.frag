@@ -1,11 +1,11 @@
-#version 120
+#version 410
 
-varying vec2 velocity;
+in vec2 velocity;
 
-// out vec4 fColor;
+out vec4 outColor;
 
 void main() 
 { 
 	vec2 nV = abs(normalize(velocity));	
-	gl_FragColor = vec4(nV.x, 1 - nV.x, nV.y, 1.0);
+	outColor = vec4(nV.x, 1 - nV.x, nV.y, 1.0);
 } 

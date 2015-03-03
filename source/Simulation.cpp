@@ -42,6 +42,7 @@ void Simulation::execute()
 const char* Simulation::init()
 {
 	// initialize glfw and window
+	glfwSetErrorCallback(errorCallback);	
 	if (glfwInit() == false) 
 	{
 		return "failed to initialize glfw";
@@ -49,7 +50,9 @@ const char* Simulation::init()
 	glfwDefaultWindowHints();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Config::instance()->getInt("glVersionMajor", 1));
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Config::instance()->getInt("glVersionMinor", 0));
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 
 	int width = Config::instance()->getInt("windowWidth");
 	int height = Config::instance()->getInt("windowHeight");
@@ -128,6 +131,11 @@ void Simulation::keyCallback(GLFWwindow* window, int key, int scancode, int acti
 }
 
 // Static input helpers
+void Simulation::errorCallback(int error, const char* description)
+{
+	printf("GLFW ERROR: code: %d, %s\n", error, description);
+}
+
 void Simulation::staticMouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
 	static_cast<Simulation*>(glfwGetWindowUserPointer(window))->mouseCallback(window, xpos, ypos);

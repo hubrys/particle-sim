@@ -1,10 +1,10 @@
-#version 120
+#version 410
 
 // layout(location = 0) 
-attribute vec2 vPosition;
-attribute vec2 vVelocity;
+in vec2 vPosition;
+in vec2 vVelocity;
 
-varying vec2 velocity;
+out vec2 velocity;
 
 uniform mat4 Projection;
 

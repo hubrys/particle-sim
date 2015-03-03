@@ -1,10 +1,10 @@
-#version 120
+#version 410
 
-varying vec2 velocity;
+in vec2 velocity;
 
-// out vec4 fColor;
+out vec4 outColor;
 
 void main() 
 { 
-	gl_FragColor = vec4(0, 1, 0, 1.0);
-} 
+	outColor = vec4(0, 1, 0, 1.0);
+}
