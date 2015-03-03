@@ -103,7 +103,15 @@ glm::vec2 CpuParticleManager::calculateForce(CpuParticle& lhs, CpuParticle& rhs)
 {
     glm::vec2 diff = rhs.position - lhs.position;
     float distance = glm::length(diff) + _minCalcDistance;
-    float magnitude = _gravConst / (distance );//* distance);
+    float magnitude = _gravConst / (distance * distance);
+    return magnitude * glm::normalize(diff);   
+}
+
+glm::vec2 CpuParticleManager::calculateMouseForce(CpuParticle& lhs, glm::vec2& mousePos, float mouseMass)
+{
+    glm::vec2 diff = mousePos - lhs.position;
+    float distance = glm::length(diff) + _minCalcDistance;
+    float magnitude = _gravConst * mouseMass / (distance);//* distance);
     return magnitude * glm::normalize(diff);   
 }
 

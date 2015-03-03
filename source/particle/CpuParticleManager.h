@@ -51,5 +51,6 @@ protected:
 	glm::mat4 _projection;
 
 	glm::vec2 calculateForce(CpuParticle& lhs, CpuParticle& rhs);
+	glm::vec2 calculateMouseForce(CpuParticle& lhs, glm::vec2& mousePos, float mouseMass);
 	void applyVelocity(float deltaTime);
 };

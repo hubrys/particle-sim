@@ -5,7 +5,7 @@ windowHeight=600
 # render config
 glVersionMajor=1
 glVersionMinor=0
-pointSize=2
+pointSize=8
 #colorBy types: none, direction, velocity, both
 colorBy=direction
 
@@ -14,12 +14,12 @@ gravConst=100
 minCalcDistance=.1
 
 # particle config
-particleCount=100000
-friction=.9
+particleCount=1000
+friction=.1
 
 # mouse config
-mouseMass=700
-mouseOnly=1
+mouseMass=100
+mouseOnly=0
 
 # calculation config
 # managerTypes: cpuPair, cpuStepped
