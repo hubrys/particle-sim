@@ -1,24 +1,23 @@
 #include "./SteppedCpuParticleManager.h"
 
-void SteppedCpuParticleManager::tick(float deltaTime)
+void SteppedCpuParticleManager::tick(float deltaTime, glm::vec2 mousePosition, float mouseMass)
 {
+	CpuParticle mouseParticle = CpuParticle(mousePosition, glm::vec2(0));
+
 	for (int particleI = 0; particleI < _particleCount - 1; particleI++)
 	{
-		CpuParticle* particle = &_particles[particleI];
+		_particles[particleI].velocity  += calculateForce(_particles[particleI], mouseParticle) * mouseMass * deltaTime;
 
-        for (int otherParticleI = particleI + 1; otherParticleI < _particleCount; otherParticleI++)
-        {
-            glm::vec2 diff = _particles[otherParticleI].position - particle->position;
-            float distance = glm::length(diff);
-            float force = _gravConst / ((distance * distance) + _minCalcDistance);
-            diff = force * glm::normalize(diff);
-            particle->velocity += diff;
-            _particles[otherParticleI].velocity -= diff;
-        }
+		if (_mouseOnly == false)
+		{
+	        for (int otherParticleI = particleI + 1; otherParticleI < _particleCount; otherParticleI++)
+	        {
+	            glm::vec2 force = calculateForce(_particles[particleI], _particles[otherParticleI]) * deltaTime;
+	            _particles[particleI].velocity += force;
+	            _particles[otherParticleI].velocity -= force;
+	        }
+		}
 	}
 
-    for (int particleI = 0; particleI < _particleCount; particleI++)
-    {
-        _particles[particleI].position += _particles[particleI].velocity * deltaTime;
-    }
+	applyVelocity(deltaTime);
 }

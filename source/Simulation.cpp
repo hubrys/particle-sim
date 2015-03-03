@@ -21,15 +21,17 @@ void Simulation::execute()
 
 	using namespace std::chrono;
 
-	glPointSize(4.f);
+	glPointSize(Config::instance()->getFloat("pointSize", 1.f));
 	_running = true;
+
+	float mouseMass = Config::instance()->getFloat("mouseMass");
 
 	Timer timer;
 	timer.reset();
 	while(glfwWindowShouldClose(_window) == false && _running) 
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
-		_manager->tick(timer.lap());
+		_manager->tick(timer.lap(), _mousePosition, _useMouse ? mouseMass : 0);
 		_manager->render();
 		glfwSwapBuffers(_window);
 
@@ -44,17 +46,27 @@ const char* Simulation::init()
 	{
 		return "failed to initialize glfw";
 	}
+	glfwDefaultWindowHints();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Config::instance()->getInt("glVersionMajor", 1));
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Config::instance()->getInt("glVersionMinor", 0));
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 
 	int width = Config::instance()->getInt("windowWidth");
 	int height = Config::instance()->getInt("windowHeight");
+    _windowDimens = glm::vec2(width, height);
 
 	_window = glfwCreateWindow(width, height, "Particle Simulation", nullptr, nullptr);
 	if (_window == nullptr) 
 	{
 		return "failed to create window";
 	}
+	glfwSetWindowUserPointer(_window, this);
 
 	glfwMakeContextCurrent(_window);
+	glfwSetCursorPosCallback(_window, staticMouseCallback);
+	glfwSetMouseButtonCallback(_window, staticMouseButtonCallback);
+    glfwSetKeyCallback(_window, staticKeyCallback);
+    glfwSetInputMode(_window, GLFW_STICKY_KEYS, 1);
 
 	// initialize glew
 	glewExperimental = GL_TRUE; 
@@ -68,7 +80,7 @@ const char* Simulation::init()
 	float gravConst = Config::instance()->getFloat("gravConst", 1);
 
 	std::string managerType = Config::instance()->getString("particleManager", "cpu");
-	if (managerType == "cpu")
+	if (managerType == "cpuPair")
 	{
 		_manager = new CpuParticleManager();
 	} 
@@ -76,14 +88,57 @@ const char* Simulation::init()
 	{
 		_manager = new SteppedCpuParticleManager();
 	}
-	
+
 	const char* result = _manager->init();
 	if (result != nullptr)
 	{
 		return result;
 	}
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	return nullptr;
+}
+
+#define IF_KEY_PRESSED(input) if ((key == input) && action == GLFW_PRESS)
+#define IF_KEY_RELEASED(input) if ((key == input) && action == GLFW_RELEASE)
+
+void Simulation::mouseCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	_mousePosition = glm::vec2(float(xpos) - _windowDimens.x / 2, 
+							   _windowDimens.y / 2 - float(ypos));
+}
+
+void Simulation::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+
+}
+
+void Simulation::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	IF_KEY_PRESSED(GLFW_KEY_Q)
+	{
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	IF_KEY_PRESSED(GLFW_KEY_SPACE)
+	{
+		_useMouse = !_useMouse;
+	}
+}
+
+// Static input helpers
+void Simulation::staticMouseCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	static_cast<Simulation*>(glfwGetWindowUserPointer(window))->mouseCallback(window, xpos, ypos);
+}
+
+void Simulation::staticMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	static_cast<Simulation*>(glfwGetWindowUserPointer(window))->mouseButtonCallback(window, button, action, mods);
+}
+
+void Simulation::staticKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	static_cast<Simulation*>(glfwGetWindowUserPointer(window))->keyCallback(window, key, scancode, action, mods);
 }

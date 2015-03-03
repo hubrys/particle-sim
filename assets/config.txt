@@ -1,8 +1,26 @@
-#windowWidth
-windowWidth=640
-windowHeight=480
-particleCount=1000
-gravConst=10
-minCalcDistance=1
-# managerTypes: cpu, cpuStepped
+# window dimensions
+windowWidth=900
+windowHeight=600
+
+# render config
+glVersionMajor=1
+glVersionMinor=0
+pointSize=2
+#colorBy types: none, direction, velocity, both
+colorBy=direction
+
+# simulation config
+gravConst=100
+minCalcDistance=.1
+
+# particle config
+particleCount=100000
+friction=.9
+
+# mouse config
+mouseMass=700
+mouseOnly=1
+
+# calculation config
+# managerTypes: cpuPair, cpuStepped
 particleManager=cpuStepped
