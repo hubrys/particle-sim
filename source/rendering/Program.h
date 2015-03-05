@@ -11,6 +11,7 @@ public:
     GLuint getAttribute(const char* attribute);
     GLuint getUniform(const char* attribute);
     void setActive();
+    void destroy();
 
     static Program* createProgram(const std::string& vertexSource, const std::string& fragmentSource);
 

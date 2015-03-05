@@ -2,8 +2,11 @@
 
 CpuParticleManager::~CpuParticleManager()
 {
+    _program->destroy();
+    glDeleteBuffers(1, &_d_particleBuffer);
+
     delete _program;
-	delete[] _particles;
+    delete[] _particles;
 }
 
 const char* CpuParticleManager::init()
@@ -20,8 +23,11 @@ const char* CpuParticleManager::init()
     _particleCount = dim * dim;
     _particles = new CpuParticle[_particleCount];
 
-    float width = Config::instance()->getFloat("windowWidth");
-    float height = Config::instance()->getFloat("windowHeight");
+    float worldScale = Config::instance()->getFloat("worldScale");
+    float ratio = Config::instance()->getFloat("windowWidth") / 
+                    Config::instance()->getFloat("windowHeight");
+    float width = worldScale * ratio;
+    float height = worldScale;
 
     float xStep = width / dim;
     float yStep = height / dim;

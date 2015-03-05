@@ -13,10 +13,13 @@ int main(int argc, char** argv)
 		root = std::string(argv[1]);
 	}
 
-	Config config = Config::fromFile(root + "config.txt");
-	config.setString("assetRoot", root);
-	Config::setGlobalInstance(&config);
+	bool restart = true;
+	while (restart)
+	{
+		Config config = Config::fromFile(root + "config.txt");
+		config.setString("assetRoot", root);
+		Config::setGlobalInstance(&config);
 
-
-	Simulation().execute();
+		restart = Simulation().execute();
+	}
 }

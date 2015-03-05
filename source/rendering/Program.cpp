@@ -31,6 +31,11 @@ bool Program::init(const Shader& vertex, const Shader& fragment)
     return true;
 }
 
+void Program::destroy() 
+{
+    glDeleteProgram(_id);
+}
+
 GLuint Program::getAttribute(const char* attribute)
 {
     return glGetAttribLocation(_id, attribute);

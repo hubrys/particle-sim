@@ -9,26 +9,26 @@ Simulation::~Simulation()
 	glfwTerminate();
 }
 
-void Simulation::execute()
+bool Simulation::execute()
 {
+	_restart = false;
 	const char* result = init();
 
 	if (result != nullptr) 
 	{
 		printf("%s\n", result);
-		return;
+		return false;
 	}
 
 	using namespace std::chrono;
 
 	glPointSize(Config::instance()->getFloat("pointSize", 1.f));
-	_running = true;
 
 	float mouseMass = Config::instance()->getFloat("mouseMass");
 
 	Timer timer;
 	timer.reset();
-	while(glfwWindowShouldClose(_window) == false && _running) 
+	while(glfwWindowShouldClose(_window) == false && _restart == false) 
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		_manager->tick(timer.lap(), _mousePosition, _useMouse ? mouseMass : 0);
@@ -37,6 +37,8 @@ void Simulation::execute()
 
 		glfwPollEvents();
 	}
+
+	return _restart;
 }
 
 const char* Simulation::init()
@@ -57,6 +59,7 @@ const char* Simulation::init()
 	int width = Config::instance()->getInt("windowWidth");
 	int height = Config::instance()->getInt("windowHeight");
     _windowDimens = glm::vec2(width, height);
+    _worldScale = Config::instance()->getFloat("worldScale");
 
 	_window = glfwCreateWindow(width, height, "Particle Simulation", nullptr, nullptr);
 	if (_window == nullptr) 
@@ -108,8 +111,9 @@ const char* Simulation::init()
 
 void Simulation::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	_mousePosition = glm::vec2(float(xpos) - _windowDimens.x / 2, 
-							   _windowDimens.y / 2 - float(ypos));
+	_mousePosition.x = (2 * float(xpos) - _windowDimens.x) / (2 * _windowDimens.y);
+	_mousePosition.y = -(float(ypos) / _windowDimens.y - .5f);
+	_mousePosition *= _worldScale;
 }
 
 void Simulation::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -127,6 +131,11 @@ void Simulation::keyCallback(GLFWwindow* window, int key, int scancode, int acti
 	IF_KEY_PRESSED(GLFW_KEY_SPACE)
 	{
 		_useMouse = !_useMouse;
+	}
+
+	IF_KEY_PRESSED(GLFW_KEY_R) 
+	{
+		_restart = true;
 	}
 }
 

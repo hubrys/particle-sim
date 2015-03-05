@@ -2,8 +2,6 @@
 
 void SteppedCpuParticleManager::tick(float deltaTime, glm::vec2 mousePosition, float mouseMass)
 {
-	CpuParticle mouseParticle = CpuParticle(mousePosition, glm::vec2(0));
-
 	for (int particleI = 0; particleI < _particleCount - 1; particleI++)
 	{
 		_particles[particleI].velocity += calculateMouseForce(_particles[particleI], mousePosition, mouseMass) * deltaTime;
