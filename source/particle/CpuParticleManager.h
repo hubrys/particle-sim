@@ -29,7 +29,7 @@ public:
 	~CpuParticleManager();
 	virtual const char* init();
 	virtual void tick(float deltaTime, glm::vec2 mousePos, float mouseMass);
-	virtual void render();
+	virtual void render(float deltaTime);
 
 protected:
 	int _particleCount;
@@ -48,6 +48,7 @@ protected:
 	GLuint _d_vao;
 	GLuint _d_particleBuffer;
 	GLuint _d_projection;
+	GLuint _d_deltaTime;
 	glm::mat4 _projection;
 
 	glm::vec2 calculateForce(CpuParticle& lhs, CpuParticle& rhs);

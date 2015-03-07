@@ -7,6 +7,7 @@ in vec2 vVelocity;
 out vec2 velocity;
 
 uniform mat4 Projection;
+uniform float DeltaTime;
 
 // uniform mat4 Projection;
 
@@ -16,5 +17,5 @@ void main()
 	velocity = vVelocity;
 	
 	// gl_Position = Projection * vec4(position, 1.0);
-	gl_Position = Projection * vec4(vPosition, -.5, 1.0);
+	gl_Position = Projection * vec4(vPosition + vVelocity * DeltaTime, -.5, 1.0);
 }

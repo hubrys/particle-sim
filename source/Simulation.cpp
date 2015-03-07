@@ -25,17 +25,46 @@ bool Simulation::execute()
 	glPointSize(Config::instance()->getFloat("pointSize", 1.f));
 
 	float mouseMass = Config::instance()->getFloat("mouseMass");
+	float timeStep = Config::instance()->getFloat("timeStep", .1f);
 
 	Timer timer;
 	timer.reset();
-	while(glfwWindowShouldClose(_window) == false && _restart == false) 
-	{
-		glClear(GL_COLOR_BUFFER_BIT);
-		_manager->tick(timer.lap(), _mousePosition, _useMouse ? mouseMass : 0);
-		_manager->render();
-		glfwSwapBuffers(_window);
+	float accumulation = 0;
 
-		glfwPollEvents();
+	if (Config::instance()->getInt("useFixedTimeStep"))
+	{
+		while(glfwWindowShouldClose(_window) == false && _restart == false) 
+		{
+			// process inputs
+			glfwPollEvents();
+			
+			// update
+			accumulation += timer.lap();
+			while (accumulation >= timeStep)
+			{
+				_manager->tick(timeStep, _mousePosition, _useMouse ? mouseMass : 0);
+				accumulation -= timeStep;
+			}
+
+			// render
+			glClear(GL_COLOR_BUFFER_BIT);
+			_manager->render(accumulation);
+			glfwSwapBuffers(_window);
+		}
+	} else {
+		while(glfwWindowShouldClose(_window) == false && _restart == false) 
+		{
+			// process inputs
+			glfwPollEvents();
+			
+			// update
+			_manager->tick(timer.lap(), _mousePosition, _useMouse ? mouseMass : 0);
+
+			// render
+			glClear(GL_COLOR_BUFFER_BIT);
+			_manager->render(0.f);
+			glfwSwapBuffers(_window);
+		}
 	}
 
 	return _restart;

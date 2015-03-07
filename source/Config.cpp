@@ -65,7 +65,7 @@ int Config::getInt(const std::string& key, int def) const
 	return std::stoi(it->second);
 }
 
-float Config::getFloat(const std::string& key, int defaultValue) const
+float Config::getFloat(const std::string& key, float defaultValue) const
 {
     auto it = _values.find(key);
     if (it == _values.end())

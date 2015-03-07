@@ -1,6 +1,6 @@
 # window dimensions
-windowWidth=900
-windowHeight=600
+windowWidth=1200
+windowHeight=800
 
 # render config
 glVersionMajor=4
@@ -10,9 +10,11 @@ pointSize=1
 colorBy=direction
 
 # simulation config
-worldScale=3
+useFixedTimeStep=1
+timeStep=.03
+worldScale=4
 gravConst=1
-minCalcDistance=.1
+minCalcDistance=.01
 
 # particle config
 particleCount=100000

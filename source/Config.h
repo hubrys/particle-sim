@@ -13,7 +13,7 @@ class Config
         static void setGlobalInstance(Config* config);
 
 		int getInt(const std::string& key, int defaultValue = 0) const;
-		float getFloat(const std::string& key, int defaultValue = 0.f) const;
+		float getFloat(const std::string& key, float defaultValue = 0.f) const;
 		const std::string& getString(const std::string& key, const std::string& defaultValue = "") const;
 
 		void setString(const std::string& key, const std::string& value);

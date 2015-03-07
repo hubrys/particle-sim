@@ -59,6 +59,7 @@ const char* CpuParticleManager::init()
     _program->setActive();
 
     _d_projection = _program->getUniform("Projection");
+    _d_deltaTime = _program->getUniform("DeltaTime");
 
     glGenVertexArrays(1, &_d_vao);
     glBindVertexArray(_d_vao);
@@ -141,8 +142,9 @@ void CpuParticleManager::applyVelocity(float deltaTime)
     }
 }
 
-void CpuParticleManager::render()
+void CpuParticleManager::render(float deltaTime)
 {
+    glUniform1f(_d_deltaTime, deltaTime);
     glUniformMatrix4fv(_d_projection, 1, GL_FALSE, glm::value_ptr(_projection));
     // transfer data to GPU 
     glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
