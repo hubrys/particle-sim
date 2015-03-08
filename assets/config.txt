@@ -7,12 +7,12 @@ glVersionMajor=4
 glVersionMinor=1
 pointSize=1
 #colorBy types: none, direction, velocity, both
-colorBy=direction
+colorBy=both
 
 # simulation config
-useFixedTimeStep=1
-timeStep=.03
-worldScale=4
+useFixedTimeStep=0
+timeStep=.1
+worldScale=3
 gravConst=1
 minCalcDistance=.01
 

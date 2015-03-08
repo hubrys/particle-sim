@@ -7,8 +7,7 @@ int main(int argc, char** argv)
 	std::string root;
 	if (argc <= 1)
 	{
-		printf("no asset folder defined, using current dir\n");
-		root = "./";
+		root = "./assets/";
 	} else {
 		root = std::string(argv[1]);
 	}
