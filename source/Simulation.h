@@ -15,7 +15,7 @@ public:
 private:
 	GLFWwindow* _window;
 	GLuint _points;
-	IParticleManager* _manager;
+	IParticleManager* _manager = nullptr;
 
 	glm::vec2 _windowDimens;
 	glm::vec2 _mousePosition;
