@@ -17,12 +17,13 @@ gravConst=1
 minCalcDistance=.01
 
 # particle config
-particleCount=1000
-friction=.9
+particleMass=.01
+particleCount=100
+friction=.5
 
 # mouse config
-mouseMass=1
-mouseOnly=0
+mouseMass=200
+mouseOnly=1
 
 # calculation config
 # managerTypes: cpuPair, cpuStepped

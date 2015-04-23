@@ -68,6 +68,7 @@ const char* CpuParticleManager::init()
     glGenBuffers(1, &_d_particleBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
     glBufferData(GL_ARRAY_BUFFER, _particleCount * sizeof(CpuParticle), nullptr, GL_DYNAMIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLuint d_vPosition = _program->getAttribute("vPosition");
     glEnableVertexAttribArray(d_vPosition);
@@ -82,14 +83,14 @@ const char* CpuParticleManager::init()
     return nullptr;
 }
 
-void CpuParticleManager::tick(float deltaTime, glm::vec2 mousePosition, float mouseMass)
+void CpuParticleManager::tick(float deltaTime, float particleMass, glm::vec2 mousePosition, float mouseMass)
 {
     CpuParticle mouseParticle = CpuParticle(mousePosition, glm::vec2(0));
 
     for (int particleI = 0; particleI < _particleCount; particleI++)
     {
         CpuParticle* particle = &_particles[particleI];
-        particle->velocity += calculateForce(*particle, mouseParticle) * mouseMass * deltaTime;
+        particle->velocity += calculateForce(*particle, mouseParticle) * (particleMass * mouseMass * deltaTime);
         glm::vec2 totalForce(0);
         for (int otherParticleI = 0; otherParticleI < _particleCount; otherParticleI++)
         {
@@ -97,7 +98,7 @@ void CpuParticleManager::tick(float deltaTime, glm::vec2 mousePosition, float mo
             {
                 continue;
             }
-            totalForce += calculateForce(*particle, _particles[otherParticleI]);
+            totalForce += calculateForce(*particle, _particles[otherParticleI]) * particleMass * particleMass;
 
         }
         particle->velocity += totalForce * deltaTime;

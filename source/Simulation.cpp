@@ -24,6 +24,7 @@ bool Simulation::execute()
 
 	glPointSize(Config::instance()->getFloat("pointSize", 1.f));
 
+    float particleMass = Config::instance()->getFloat("particleMass", 1.f);
 	float mouseMass = Config::instance()->getFloat("mouseMass");
 	float timeStep = Config::instance()->getFloat("timeStep", .1f);
 
@@ -42,7 +43,7 @@ bool Simulation::execute()
 			accumulation += timer.lap();
 			while (accumulation >= timeStep)
 			{
-				_manager->tick(timeStep, _mousePosition, _useMouse ? mouseMass : 0);
+				_manager->tick(timeStep, particleMass, _mousePosition, _useMouse ? mouseMass : 0);
 				accumulation -= timeStep;
 			}
 
@@ -58,7 +59,7 @@ bool Simulation::execute()
 			glfwPollEvents();
 			
 			// update
-			_manager->tick(timer.lap(), _mousePosition, _useMouse ? mouseMass : 0);
+			_manager->tick(timer.lap(), particleMass, _mousePosition, _useMouse ? mouseMass : 0);
 
 			// render
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -83,7 +84,6 @@ const char* Simulation::init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Config::instance()->getInt("glVersionMinor", 0));
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
 	int width = Config::instance()->getInt("windowWidth");
 	int height = Config::instance()->getInt("windowHeight");

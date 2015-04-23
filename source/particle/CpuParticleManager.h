@@ -28,7 +28,7 @@ class CpuParticleManager
 public:
 	~CpuParticleManager();
 	virtual const char* init();
-	virtual void tick(float deltaTime, glm::vec2 mousePos, float mouseMass);
+    virtual void tick(float deltaTime, float particleMass, glm::vec2 mousePos, float mouseMass);
 	virtual void render(float deltaTime);
 
 protected:

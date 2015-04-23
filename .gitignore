@@ -1,3 +1,10 @@
 .DS_Store
 ext-deps/
 build/
+x64/
+*.suo
+Debug/
+*.sdf
+*.opensdf
+*.pdb
+*.vcxproj.user
