@@ -7,7 +7,7 @@ glVersionMajor=4
 glVersionMinor=1
 pointSize=1
 #colorBy types: none, direction, velocity, both
-colorBy=direction
+colorBy=both
 
 # simulation config
 useFixedTimeStep=0
@@ -18,13 +18,14 @@ minCalcDistance=.01
 
 # particle config
 particleMass=.01
-particleCount=100
+particleCountX=4032
+particleCountY=4000
 friction=.5
 
 # mouse config
-mouseMass=200
+mouseMass=100
 mouseOnly=1
 
 # calculation config
-# managerTypes: cpuPair, cpuStepped
-particleManager=cpuStepped
+# managerTypes: cpuPair, cpuStepped, gpuPair
+particleManager=gpuPair

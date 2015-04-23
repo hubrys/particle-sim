@@ -123,6 +123,10 @@ const char* Simulation::init()
 	{
 		_manager = new SteppedCpuParticleManager();
 	}
+    else if (managerType == "gpuPair")
+    {
+        _manager = new GpuParticleManager();
+    }
 
 	const char* result = _manager->init();
 	if (result != nullptr)

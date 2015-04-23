@@ -17,10 +17,11 @@ const char* CpuParticleManager::init()
     _mouseOnly = Config::instance()->getInt("mouseOnly", 0);
     _friction = Config::instance()->getFloat("friction", 0);
 
-    int dim = std::sqrt(_particleCount);
+    int dimX = Config::instance()->getInt("particleCountX", 32);
+    int dimY = Config::instance()->getInt("particleCountY", 32);
 
     // Initialize particle array
-    _particleCount = dim * dim;
+    _particleCount =  dimX * dimY;
     _particles = new CpuParticle[_particleCount];
 
     float worldScale = Config::instance()->getFloat("worldScale");
@@ -29,8 +30,8 @@ const char* CpuParticleManager::init()
     float width = worldScale * ratio;
     float height = worldScale;
 
-    float xStep = width / dim;
-    float yStep = height / dim;
+    float xStep = width / dimX;
+    float yStep = height / dimY;
 
     float xOffset = width / 2.f;
     float yOffset = height / 2.f;
@@ -38,12 +39,14 @@ const char* CpuParticleManager::init()
     _bounds = glm::vec2(xOffset, yOffset);
     _projection = glm::ortho(-xOffset, xOffset, -yOffset, yOffset, 0.f, 1.f);
 
-    for (int yI = 0; yI < dim; yI++) 
+    for (int yI = 0; yI < dimY; yI++) 
     {
-        for (int xI = 0; xI < dim; xI++)
+        for (int xI = 0; xI < dimX; xI++)
         {
-            _particles[yI * dim + xI] = CpuParticle(glm::vec2(xStep * xI - xOffset, yStep * yI - yOffset),
+            _particles[yI * dimX + xI] = CpuParticle(glm::vec2(xStep * xI - xOffset, yStep * yI - yOffset),
                                                     glm::vec2(.00000001f));
+            /*_particles[yI * dimX + xI] = CpuParticle(glm::vec2(xI * yI * .000000001f),
+                                                     glm::vec2(.00000001f));*/
         }
     }
 

@@ -4,3 +4,4 @@
 #include "./CpuParticleManager.h"
 #include "./SteppedCpuParticleManager.h"
 #include "./GridCpuParticleManager.h"
+#include "./GpuParticleManager.h"

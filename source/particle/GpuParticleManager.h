@@ -8,11 +8,12 @@ class GpuParticleManager
     : public CpuParticleManager
 {
 public: 
-    ~GpuParticleManager();
     virtual const char* init();
     virtual void tick(float deltaTime, float particleMass, glm::vec2 mousePos, float mouseMass);
     virtual void render(float deltaTime);
 
 protected:
     struct cudaGraphicsResource* _cuda_particles;
+    int _particleDimX;
+    int _particleDimY;
 };

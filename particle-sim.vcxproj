@@ -99,7 +99,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;ext-deps/glew-1.12.0/lib/Release/x64/glew32s.lib;ext-deps/glfw-build/src/$(Configuration)/glfw3.lib;cudart.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;ext-deps/glew-1.12.0/lib/Release/x64/glew32s.lib;ext-deps/glfw-build/src/$(Configuration)/glfw3.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
@@ -143,7 +143,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;ext-deps/glew-1.12.0/lib/Release/x64/glew32s.lib;ext-deps/glfw-build/src/$(Configuration)/glfw3.lib;cudart.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;ext-deps/glew-1.12.0/lib/Release/x64/glew32s.lib;ext-deps/glfw-build/src/$(Configuration)/glfw3.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
@@ -167,6 +167,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="source\Config.h" />
     <ClInclude Include="source\particle\CpuParticleManager.h" />
+    <ClInclude Include="source\particle\cuda_utils.h" />
     <ClInclude Include="source\particle\GpuParticleManager.h" />
     <ClInclude Include="source\particle\GridCpuParticleManager.h" />
     <ClInclude Include="source\particle\IParticleManager.h" />
