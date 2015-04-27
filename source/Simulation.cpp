@@ -144,6 +144,10 @@ const char* Simulation::init()
     {
         _manager = new GpuParticleManager();
     }
+    /*else if (managerType == "gpuSOA")
+    {
+        _manager = new SOAGpuParticleManager();
+    }*/
 
     const char* result = _manager->init();
     if (result != nullptr)

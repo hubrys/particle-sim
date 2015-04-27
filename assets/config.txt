@@ -20,13 +20,13 @@ minCalcDistance=.01
 # particle config
 particleMass=.01
 particleCountX=128
-particleCountY=128
+particleCountY=256
 friction=2
 
 # mouse config
 mouseMass=300
-mouseOnly=0
+mouseOnly=1
 
 # calculation config
-# managerTypes: cpuPair, cpuStepped, gpuPair
+# managerTypes: cpuPair, cpuStepped, gpuPair, gpuSOA
 particleManager=gpuPair

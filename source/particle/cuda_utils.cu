@@ -1,12 +1,4 @@
-#pragma once
-#ifndef cuda_utils_h
-#define cuda_utils_h
-//#include <cmath>
-#include "cuda_runtime.h"
-
-#define GRAV_CONST 1
-#define BLOCK_SIZE 512
-#define MIN_CALC_DISTANCE .01f
+#include "cuda_utils.cuh"
 
 __device__ float2 add(float2 lhs, float2 rhs)
 {
@@ -65,4 +57,3 @@ __device__ float2 calculateForceMouse(float x1, float y1, float m1, float x2, fl
         return make_float2(0, 0);
     }
 }
-#endif

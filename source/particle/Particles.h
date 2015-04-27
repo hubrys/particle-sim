@@ -5,3 +5,4 @@
 #include "./SteppedCpuParticleManager.h"
 #include "./GridCpuParticleManager.h"
 #include "./GpuParticleManager.h"
+#include "./SOAGpuParticleManager.h"

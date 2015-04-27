@@ -22,6 +22,7 @@ const char* GpuParticleManager::init()
 
     glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _particleCount * sizeof(CpuParticle), _particles);
+    glUniformMatrix4fv(_d_projection, 1, GL_FALSE, glm::value_ptr(_projection));
 
     return nullptr;
 }
@@ -41,12 +42,7 @@ void GpuParticleManager::tick(float deltaTime, float particleMass, glm::vec2 mou
 
 void GpuParticleManager::render(float deltaTime)
 {
-    glUniform1f(_d_deltaTime, deltaTime);
-    glUniformMatrix4fv(_d_projection, 1, GL_FALSE, glm::value_ptr(_projection));
-    //// transfer data to GPU 
-    //glBindBuffer(GL_ARRAY_BUFFER, _d_particleBuffer);
-    //glBufferSubData(GL_ARRAY_BUFFER, 0, _particleCount * sizeof(CpuParticle), _particles);
-
     glBindVertexArray(_d_vao);
+    glUniform1f(_d_deltaTime, deltaTime);
     glDrawArrays(GL_POINTS, 0, _particleCount);
 }
