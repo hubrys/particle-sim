@@ -20,7 +20,7 @@ private:
 	glm::vec2 _windowDimens;
 	glm::vec2 _mousePosition;
 	float _worldScale;
-	bool _useMouse;
+	bool _useMouse = false;
 	bool _restart;
 
 	const char* init();

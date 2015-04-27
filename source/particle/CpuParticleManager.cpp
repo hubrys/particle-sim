@@ -37,7 +37,7 @@ const char* CpuParticleManager::init()
     float yOffset = height / 2.f;
 
     _bounds = glm::vec2(xOffset, yOffset);
-    _projection = glm::ortho(-xOffset, xOffset, -yOffset, yOffset, 0.f, 1.f);
+    _projection = glm::ortho(-xOffset, xOffset, -yOffset, yOffset, 0.f, 20000.f);
 
     for (int yI = 0; yI < dimY; yI++) 
     {
@@ -82,7 +82,6 @@ const char* CpuParticleManager::init()
     glVertexAttribPointer(d_vVelocity, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (const void*)(2 * sizeof(GLfloat)));    
 
     glBindVertexArray(0);
-
     return nullptr;
 }
 

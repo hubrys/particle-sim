@@ -1,7 +1,7 @@
 #include "./GpuParticleManager.h"
 
 void launchCudaTick(float deltaTime, float particleMass, float mouseX, float mouseY, float mouseMass,
-struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount, float2 bounds);
+struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount, float2 bounds, float friction);
 
 const char* GpuParticleManager::init()
 {
@@ -35,7 +35,8 @@ void GpuParticleManager::tick(float deltaTime, float particleMass, glm::vec2 mou
     _cuda_particles, 
     _mouseOnly,
     _particleDimX * _particleDimY,
-    make_float2(_bounds.x, _bounds.y));
+    make_float2(_bounds.x, _bounds.y),
+    _friction);
 }
 
 void GpuParticleManager::render(float deltaTime)

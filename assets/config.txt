@@ -1,6 +1,7 @@
 # window dimensions
 windowWidth=1200
 windowHeight=800
+useFullscreen=0
 
 # render config
 glVersionMajor=4
@@ -11,19 +12,19 @@ colorBy=both
 
 # simulation config
 useFixedTimeStep=0
-timeStep=.1
+timeStep=.02
 worldScale=3
 gravConst=1
 minCalcDistance=.01
 
 # particle config
 particleMass=.01
-particleCountX=4032
-particleCountY=4000
-friction=.5
+particleCountX=4096
+particleCountY=4096
+friction=3
 
 # mouse config
-mouseMass=100
+mouseMass=300
 mouseOnly=1
 
 # calculation config
