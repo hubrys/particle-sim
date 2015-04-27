@@ -3,10 +3,6 @@
 #include "cuda_utils.h"
 #include <iostream>
 
-#define BLOCK_SIZE 512
-#define MIN_CALC_DISTANCE .01f
-#define GRAV_CONST 1
-
 typedef struct
 {
     float4* particles;
@@ -24,35 +20,32 @@ __global__ void tickMouseOnly(KernelArgs args)
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     float4 particle = args.particles[index];
 
-    // calculate position diff
-    float2 diff;
-    diff.x = args.mousePos.x - particle.x;
-    diff.y = args.mousePos.y - particle.y;
+    float2 velocity = scale(
+        calculateForceMouse(particle.x, particle.y, args.particleMass, args.mousePos.x, args.mousePos.y, args.mouseMass),
+        args.deltaTime
+        );
 
-    float distance = length(diff) + MIN_CALC_DISTANCE;
-    float magnitude = GRAV_CONST * args.mouseMass * args.particleMass / (distance);
-    float2 velocity = scale(normalize(diff), magnitude * args.deltaTime);
     velocity.x += particle.z;
     velocity.y += particle.w;
     float2 position = make_float2(particle.x, particle.y);
 
     position.x += velocity.x * args.deltaTime;
     position.y += velocity.y * args.deltaTime;
-    
+
     if (args.bounds.x - abs(position.x) < 0 &&
-    position.x * velocity.x > 0)
+        position.x * velocity.x > 0)
     {
-    velocity.x = -velocity.x;
-    position.x = position.x < 0 ? -args.bounds.x : args.bounds.x;
+        velocity.x = -velocity.x;
+        position.x = position.x < 0 ? -args.bounds.x : args.bounds.x;
     }
 
     if (args.bounds.y - abs(position.y) < 0 &&
-    position.y * velocity.y > 0)
+        position.y * velocity.y > 0)
     {
-    velocity.y = -velocity.y;
-    position.y = position.y < 0 ? -args.bounds.y : args.bounds.y;
+        velocity.y = -velocity.y;
+        position.y = position.y < 0 ? -args.bounds.y : args.bounds.y;
     }
-    
+
 
     //if (args.bounds.x - abs(position.x) < 0 &&
     //    position.x * velocity.x > 0)
@@ -67,7 +60,7 @@ __global__ void tickMouseOnly(KernelArgs args)
     //    //velocity.y = -velocity.y;
     //    position.y = position.y > 0 ? -args.bounds.y : args.bounds.y;
     //}
-    
+
     velocity = scale(velocity, 1 - args.friction * args.deltaTime);
 
     args.particles[index] = make_float4(position.x, position.y,
@@ -80,48 +73,37 @@ __global__ void tickNBody(KernelArgs args)
     float4 particle = args.particles[index];
     float2 thisPosition = make_float2(particle.x, particle.y);
 
-    // calculate position diff
-    float2 diff = subtract(args.mousePos, thisPosition);
+    float2 force = calculateForceMouse(particle.x, particle.y, args.particleMass,
+                                  args.mousePos.x, args.mousePos.y, args.mouseMass);
 
-    // Calculate mouse force/velocity
-    float distance = length(diff) + MIN_CALC_DISTANCE;
-    float magnitude = GRAV_CONST * args.mouseMass * args.particleMass / distance;
-    float2 force = scale(normalize(diff), magnitude);
-    
 
     // Calculate particle forces
     __shared__ float4 particles[BLOCK_SIZE];
-    for (int particleI = 0; particleI < args.count; particleI+=BLOCK_SIZE)
+    for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
     {
         particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
         __syncthreads();
 
         for (int subI = 0; subI < BLOCK_SIZE; subI++)
         {
-            diff.x = particles[subI].x - particle.x;
-            diff.y = particles[subI].y - particle.y;
-
-            distance = length(diff);
-            if (distance != 0)
-            {
-                distance += MIN_CALC_DISTANCE;
-                magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-                force = add(force, scale(normalize(diff), magnitude));
-            }
+            force = add(force, calculateForce(
+                particle.x, particle.y, args.particleMass,
+                particles[subI].x, particles[subI].y, args.particleMass)
+                );
         }
     }
-    
+
     /*for (int particleI = 0; particleI < args.count; particleI ++)
     {
-        if (particleI != index)
-        {
-            diff.x = args.particles[particleI].x - particle.x;
-            diff.y = args.particles[particleI].y - particle.y;
+    if (particleI != index)
+    {
+    diff.x = args.particles[particleI].x - particle.x;
+    diff.y = args.particles[particleI].y - particle.y;
 
-            distance = length(diff) + MIN_CALC_DISTANCE;
-            magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-            force = add(force, scale(normalize(diff), magnitude));
-        }
+    distance = length(diff) + MIN_CALC_DISTANCE;
+    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
+    force = add(force, scale(normalize(diff), magnitude));
+    }
     }*/
 
 
@@ -134,18 +116,18 @@ __global__ void tickNBody(KernelArgs args)
 
     /*if (args.bounds.x - abs(position.x) < 0 &&
         position.x * velocity.x > 0)
-    {
+        {
         velocity.x = -velocity.x;
         position.x = position.x < 0 ? -args.bounds.x : args.bounds.x;
-    }
+        }
 
-    if (args.bounds.y - abs(position.y) < 0 &&
+        if (args.bounds.y - abs(position.y) < 0 &&
         position.y * velocity.y > 0)
-    {
+        {
         velocity.y = -velocity.y;
         position.y = position.y < 0 ? -args.bounds.y : args.bounds.y;
-    }
-*/
+        }
+        */
     if (args.bounds.x - abs(position.x) < 0 &&
         position.x * velocity.x > 0)
     {
@@ -180,7 +162,7 @@ struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount
         exit(0);
     }
 
-    result = cudaGraphicsResourceGetMappedPointer((void**)&particles, &numBytes, particleResource);
+    result = cudaGraphicsResourceGetMappedPointer((void**) &particles, &numBytes, particleResource);
     if (result != cudaSuccess)
     {
         printf("failed grabbing resource\n");
@@ -202,7 +184,7 @@ struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount
     if (mouseOnly)
     {
         tickMouseOnly<<<gridDim, blockDim>>>(args);
-    } 
+    }
     else
     {
         tickNBody<<<gridDim, blockDim>>>(args);
