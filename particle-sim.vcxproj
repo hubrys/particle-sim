@@ -153,7 +153,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,6 +162,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="source\particle\CpuParticleManager.cpp" />
     <ClCompile Include="source\particle\GpuParticleManager.cpp" />
     <ClCompile Include="source\particle\GridCpuParticleManager.cpp" />
+    <ClCompile Include="source\particle\SOAGpuParticleManager.cpp" />
     <ClCompile Include="source\particle\SteppedCpuParticleManager.cpp" />
     <ClCompile Include="source\rendering\Program.cpp" />
     <ClCompile Include="source\rendering\Shader.cpp" />
@@ -175,6 +176,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="source\particle\GridCpuParticleManager.h" />
     <ClInclude Include="source\particle\IParticleManager.h" />
     <ClInclude Include="source\particle\Particles.h" />
+    <ClInclude Include="source\particle\SOAGpuParticleManager.h" />
     <ClInclude Include="source\particle\SteppedCpuParticleManager.h" />
     <ClInclude Include="source\rendering\Program.h" />
     <ClInclude Include="source\rendering\Shader.h" />
@@ -182,7 +184,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="source\Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="source\particle\cuda_utils.cu" />
     <CudaCompile Include="source\particle\GpuParticleKernel.cu" />
+    <CudaCompile Include="source\particle\SOAGpuParticleKernel.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

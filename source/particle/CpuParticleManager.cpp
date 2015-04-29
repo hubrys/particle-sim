@@ -92,16 +92,18 @@ void CpuParticleManager::tick(float deltaTime, float particleMass, glm::vec2 mou
     for (int particleI = 0; particleI < _particleCount; particleI++)
     {
         CpuParticle* particle = &_particles[particleI];
-        particle->velocity += calculateForce(*particle, mouseParticle) * (particleMass * mouseMass * deltaTime);
-        glm::vec2 totalForce(0);
-        for (int otherParticleI = 0; otherParticleI < _particleCount; otherParticleI++)
+        glm::vec2 totalForce = calculateMouseForce(_particles[particleI], mousePosition, mouseMass) * particleMass;
+        if (_mouseOnly == false)
         {
-            if (particleI == otherParticleI)
+            for (int otherParticleI = 0; otherParticleI < _particleCount; otherParticleI++)
             {
-                continue;
-            }
-            totalForce += calculateForce(*particle, _particles[otherParticleI]) * particleMass * particleMass;
+                if (particleI == otherParticleI)
+                {
+                    continue;
+                }
+                totalForce += calculateForce(*particle, _particles[otherParticleI]) * particleMass * particleMass;
 
+            }
         }
         particle->velocity += totalForce * deltaTime;
     }

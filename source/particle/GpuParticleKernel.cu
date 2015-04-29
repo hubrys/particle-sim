@@ -61,7 +61,7 @@ __global__ void tickMouseOnly(KernelArgs args)
     //    position.y = position.y > 0 ? -args.bounds.y : args.bounds.y;
     //}
 
-    velocity = scale(velocity, 1 - args.friction * args.deltaTime);
+    velocity = scale(velocity, 1 - (args.friction * args.deltaTime));
 
     args.particles[index] = make_float4(position.x, position.y,
                                         velocity.x, velocity.y);
@@ -78,7 +78,7 @@ __global__ void tickNBody(KernelArgs args)
 
 
     // Calculate particle forces
-    __shared__ float4 particles[BLOCK_SIZE];
+  /*  __shared__ float4 particles[BLOCK_SIZE];
     for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
     {
         particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
@@ -91,9 +91,12 @@ __global__ void tickNBody(KernelArgs args)
                 particles[subI].x, particles[subI].y, args.particleMass)
                 );
         }
-    }
+    }*/
 
-    /*for (int particleI = 0; particleI < args.count; particleI ++)
+    float2 diff;
+    float distance;
+    float magnitude;
+    for (int particleI = 0; particleI < args.count; particleI ++)
     {
     if (particleI != index)
     {
@@ -104,7 +107,7 @@ __global__ void tickNBody(KernelArgs args)
     magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
     force = add(force, scale(normalize(diff), magnitude));
     }
-    }*/
+    }
 
 
     // Calc resulting velocity

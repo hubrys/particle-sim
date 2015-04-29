@@ -1,4 +1,4 @@
-#include "cuda_utils.cuh"
+#include "cuda_utils.h"
 
 __device__ float2 add(float2 lhs, float2 rhs)
 {
@@ -46,7 +46,7 @@ __device__ float2 calculateForceMouse(float x1, float y1, float m1, float x2, fl
 {
     float2 diff = make_float2(x2 - x1, y2 - y1);
     float distance = length(diff);
-    if (distance != 0)
+    if (distance > 0)
     {
         distance += MIN_CALC_DISTANCE;
         float magnitude = GRAV_CONST * m1 * m2 / distance;

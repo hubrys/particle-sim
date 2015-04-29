@@ -80,7 +80,7 @@ bool Simulation::execute()
     }
     float totalTime = fpsTimer.lap();
     float fps = frameCount / totalTime;
-    printf("FrameCount: %d, TotalTime: %f, PS: %f\n", frameCount, totalTime, fps);
+    printf("FrameCount: %d, TotalTime: %f, FPS: %f\n", frameCount, totalTime, fps);
 
     return _restart;
 }
@@ -132,6 +132,7 @@ const char* Simulation::init()
     float gravConst = Config::instance()->getFloat("gravConst", 1);
 
     std::string managerType = Config::instance()->getString("particleManager", "cpu");
+    printf("manager type: %s\n", managerType.c_str());
     if (managerType == "cpuPair")
     {
         _manager = new CpuParticleManager();
@@ -144,10 +145,10 @@ const char* Simulation::init()
     {
         _manager = new GpuParticleManager();
     }
-    /*else if (managerType == "gpuSOA")
+    else if (managerType == "gpuSOA")
     {
         _manager = new SOAGpuParticleManager();
-    }*/
+    }
 
     const char* result = _manager->init();
     if (result != nullptr)
