@@ -19,8 +19,8 @@ minCalcDistance=.01
 
 # particle config
 particleMass=.01
-particleCountX=64
-particleCountY=64
+particleCountX=128
+particleCountY=128
 friction=2
 
 # mouse config

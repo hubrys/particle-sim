@@ -5,7 +5,7 @@
 #include "cuda_runtime.h"
 
 #define GRAV_CONST 1
-#define BLOCK_SIZE 256
+#define BLOCK_SIZE 128
 #define MIN_CALC_DISTANCE .01f
 #define PARTICLES_PER_THREAD 4
 

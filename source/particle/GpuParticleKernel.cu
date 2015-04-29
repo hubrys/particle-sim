@@ -74,18 +74,22 @@ __global__ void tickNBody(KernelArgs args)
     float4 particles[PARTICLES_PER_THREAD];
     particles[0] = args.particles[index];
     particles[1] = args.particles[index + BLOCK_SIZE];
+#if PARTICLES_PER_THREAD > 2
     particles[2] = args.particles[index + 2 * BLOCK_SIZE];
     particles[3] = args.particles[index + 3 * BLOCK_SIZE];
+#endif
 
     float2 forces[PARTICLES_PER_THREAD];
     forces[0] = calculateForceMouse(particles[0].x, particles[0].y, args.particleMass,
-                                  args.mousePos.x, args.mousePos.y, args.mouseMass);
+                                    args.mousePos.x, args.mousePos.y, args.mouseMass);
     forces[1] = calculateForceMouse(particles[1].x, particles[1].y, args.particleMass,
                                     args.mousePos.x, args.mousePos.y, args.mouseMass);
+#if PARTICLES_PER_THREAD > 2
     forces[2] = calculateForceMouse(particles[2].x, particles[2].y, args.particleMass,
                                     args.mousePos.x, args.mousePos.y, args.mouseMass);
     forces[3] = calculateForceMouse(particles[3].x, particles[3].y, args.particleMass,
                                     args.mousePos.x, args.mousePos.y, args.mouseMass);
+#endif
 
 
     // Calculate particle forces
@@ -105,6 +109,8 @@ __global__ void tickNBody(KernelArgs args)
                 particles[1].x, particles[1].y, args.particleMass,
                 otherParticles[subI].x, otherParticles[subI].y, args.particleMass)
                 );
+
+#if PARTICLES_PER_THREAD > 2
             forces[2] = add(forces[2], calculateForce(
                 particles[2].x, particles[2].y, args.particleMass,
                 otherParticles[subI].x, otherParticles[subI].y, args.particleMass)
@@ -113,29 +119,34 @@ __global__ void tickNBody(KernelArgs args)
                 particles[3].x, particles[3].y, args.particleMass,
                 otherParticles[subI].x, otherParticles[subI].y, args.particleMass)
                 );
+#endif
         }
     }
 
     // Calc resulting velocity
     float2 velocities[PARTICLES_PER_THREAD];
-    velocities[0] = add(make_float2(particles[0].z, particles[0].w), 
-                    scale(forces[0], args.deltaTime)); // velocty += force * deltaTime
+    velocities[0] = add(make_float2(particles[0].z, particles[0].w),
+                        scale(forces[0], args.deltaTime)); // velocty += force * deltaTime
     velocities[1] = add(make_float2(particles[1].z, particles[1].w),
                         scale(forces[1], args.deltaTime)); // velocty += force * deltaTime
+#if PARTICLES_PER_THREAD > 2
     velocities[2] = add(make_float2(particles[2].z, particles[2].w),
                         scale(forces[2], args.deltaTime)); // velocty += force * deltaTime
     velocities[3] = add(make_float2(particles[3].z, particles[3].w),
                         scale(forces[3], args.deltaTime)); // velocty += force * deltaTime
+#endif
 
     float2 positions[PARTICLES_PER_THREAD];
     positions[0] = add(make_float2(particles[0].x, particles[0].y),
                        scale(velocities[0], args.deltaTime));
     positions[1] = add(make_float2(particles[1].x, particles[1].y),
                        scale(velocities[1], args.deltaTime));
+#if PARTICLES_PER_THREAD > 2
     positions[2] = add(make_float2(particles[2].x, particles[2].y),
                        scale(velocities[2], args.deltaTime));
     positions[3] = add(make_float2(particles[3].x, particles[3].y),
                        scale(velocities[3], args.deltaTime));
+#endif
 
     // bounds checking
     if (args.bounds.x - abs(positions[0].x) < 0 &&
@@ -164,6 +175,7 @@ __global__ void tickNBody(KernelArgs args)
         positions[1].y = positions[1].y > 0 ? -args.bounds.y : args.bounds.y;
     }
 
+#if PARTICLES_PER_THREAD > 2
     if (args.bounds.x - abs(positions[2].x) < 0 &&
         positions[2].x * velocities[2].x > 0)
     {
@@ -189,21 +201,26 @@ __global__ void tickNBody(KernelArgs args)
         //velocity.y = -velocity.y;
         positions[3].y = positions[3].y > 0 ? -args.bounds.y : args.bounds.y;
     }
+#endif
 
     // Apply friction
     velocities[0] = scale(velocities[0], 1 - args.friction * args.deltaTime);
     velocities[1] = scale(velocities[1], 1 - args.friction * args.deltaTime);
+#if PARTICLES_PER_THREAD > 2
     velocities[2] = scale(velocities[2], 1 - args.friction * args.deltaTime);
     velocities[3] = scale(velocities[3], 1 - args.friction * args.deltaTime);
+#endif
 
     args.particles[index] = make_float4(positions[0].x, positions[0].y,
                                         velocities[0].x, velocities[0].y);
     args.particles[index + BLOCK_SIZE] = make_float4(positions[1].x, positions[1].y,
-                                        velocities[1].x, velocities[1].y);
+                                                     velocities[1].x, velocities[1].y);
+#if PARTICLES_PER_THREAD > 2
     args.particles[index + 2 * BLOCK_SIZE] = make_float4(positions[2].x, positions[2].y,
-                                                     velocities[2].x, velocities[2].y);
+                                                         velocities[2].x, velocities[2].y);
     args.particles[index + 3 * BLOCK_SIZE] = make_float4(positions[3].x, positions[3].y,
-                                                     velocities[3].x, velocities[3].y);
+                                                         velocities[3].x, velocities[3].y);
+#endif
 }
 
 
