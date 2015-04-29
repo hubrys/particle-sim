@@ -69,86 +69,87 @@ __global__ void tickMouseOnly(KernelArgs args)
 
 __global__ void tickNBody(KernelArgs args)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    float4 particle = args.particles[index];
-    float2 thisPosition = make_float2(particle.x, particle.y);
+    int index = PARTICLES_PER_THREAD * blockIdx.x * blockDim.x + threadIdx.x;
 
-    float2 force = calculateForceMouse(particle.x, particle.y, args.particleMass,
+    float4 particles[PARTICLES_PER_THREAD];
+    particles[0] = args.particles[index];
+    particles[1] = args.particles[index + BLOCK_SIZE];
+
+    float2 forces[PARTICLES_PER_THREAD];
+    forces[0] = calculateForceMouse(particles[0].x, particles[0].y, args.particleMass,
                                   args.mousePos.x, args.mousePos.y, args.mouseMass);
+    forces[1] = calculateForceMouse(particles[1].x, particles[1].y, args.particleMass,
+                                    args.mousePos.x, args.mousePos.y, args.mouseMass);
 
 
     // Calculate particle forces
-  /*  __shared__ float4 particles[BLOCK_SIZE];
+    __shared__ float4 otherParticles[BLOCK_SIZE];
     for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
     {
-        particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
+        otherParticles[threadIdx.x] = args.particles[particleI + threadIdx.x];
         __syncthreads();
 
         for (int subI = 0; subI < BLOCK_SIZE; subI++)
         {
-            force = add(force, calculateForce(
-                particle.x, particle.y, args.particleMass,
-                particles[subI].x, particles[subI].y, args.particleMass)
+            forces[0] = add(forces[0], calculateForce(
+                particles[0].x, particles[0].y, args.particleMass,
+                otherParticles[subI].x, otherParticles[subI].y, args.particleMass)
+                );
+            forces[1] = add(forces[1], calculateForce(
+                particles[1].x, particles[1].y, args.particleMass,
+                otherParticles[subI].x, otherParticles[subI].y, args.particleMass)
                 );
         }
-    }*/
-
-    float2 diff;
-    float distance;
-    float magnitude;
-    for (int particleI = 0; particleI < args.count; particleI ++)
-    {
-    if (particleI != index)
-    {
-    diff.x = args.particles[particleI].x - particle.x;
-    diff.y = args.particles[particleI].y - particle.y;
-
-    distance = length(diff) + MIN_CALC_DISTANCE;
-    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-    force = add(force, scale(normalize(diff), magnitude));
     }
-    }
-
 
     // Calc resulting velocity
-    float2 velocity = make_float2(particle.z, particle.w);
-    velocity = add(velocity, scale(force, args.deltaTime)); // velocty += force * deltaTime
+    float2 velocities[PARTICLES_PER_THREAD];
+    velocities[0] = add(make_float2(particles[0].z, particles[0].w), 
+                    scale(forces[0], args.deltaTime)); // velocty += force * deltaTime
+    velocities[1] = add(make_float2(particles[1].z, particles[1].w),
+                        scale(forces[1], args.deltaTime)); // velocty += force * deltaTime
 
-    float2 position = make_float2(particle.x, particle.y);
-    position = add(position, scale(velocity, args.deltaTime));
+    float2 positions[PARTICLES_PER_THREAD];
+    positions[0] = add(make_float2(particles[0].x, particles[0].y),
+                       scale(velocities[0], args.deltaTime));
+    positions[1] = add(make_float2(particles[1].x, particles[1].y),
+                       scale(velocities[1], args.deltaTime));
 
-    /*if (args.bounds.x - abs(position.x) < 0 &&
-        position.x * velocity.x > 0)
-        {
-        velocity.x = -velocity.x;
-        position.x = position.x < 0 ? -args.bounds.x : args.bounds.x;
-        }
-
-        if (args.bounds.y - abs(position.y) < 0 &&
-        position.y * velocity.y > 0)
-        {
-        velocity.y = -velocity.y;
-        position.y = position.y < 0 ? -args.bounds.y : args.bounds.y;
-        }
-        */
-    if (args.bounds.x - abs(position.x) < 0 &&
-        position.x * velocity.x > 0)
+    // bounds checking
+    if (args.bounds.x - abs(positions[0].x) < 0 &&
+        positions[0].x * velocities[1].x > 0)
     {
         //velocity.x = -velocity.x;
-        position.x = position.x > 0 ? -args.bounds.x : args.bounds.x;
+        positions[0].x = positions[0].x > 0 ? -args.bounds.x : args.bounds.x;
     }
-
-    if (args.bounds.y - abs(position.y) < 0 &&
-        position.y * velocity.y > 0)
+    if (args.bounds.y - abs(positions[0].y) < 0 &&
+        positions[0].y * velocities[1].y > 0)
     {
         //velocity.y = -velocity.y;
-        position.y = position.y > 0 ? -args.bounds.y : args.bounds.y;
+        positions[0].y = positions[0].y > 0 ? -args.bounds.y : args.bounds.y;
     }
 
-    velocity = scale(velocity, 1 - args.friction * args.deltaTime);
+    if (args.bounds.x - abs(positions[1].x) < 0 &&
+        positions[1].x * velocities[1].x > 0)
+    {
+        //velocity.x = -velocity.x;
+        positions[1].x = positions[1].x > 0 ? -args.bounds.x : args.bounds.x;
+    }
+    if (args.bounds.y - abs(positions[1].y) < 0 &&
+        positions[1].y * velocities[1].y > 0)
+    {
+        //velocity.y = -velocity.y;
+        positions[1].y = positions[1].y > 0 ? -args.bounds.y : args.bounds.y;
+    }
 
-    args.particles[index] = make_float4(position.x, position.y,
-                                        velocity.x, velocity.y);
+    // Apply friction
+    velocities[0] = scale(velocities[0], 1 - args.friction * args.deltaTime);
+    velocities[1] = scale(velocities[1], 1 - args.friction * args.deltaTime);
+
+    args.particles[index] = make_float4(positions[0].x, positions[0].y,
+                                        velocities[0].x, velocities[0].y);
+    args.particles[index + BLOCK_SIZE] = make_float4(positions[1].x, positions[1].y,
+                                        velocities[1].x, velocities[1].y);
 }
 
 
@@ -182,7 +183,7 @@ struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount
     args.bounds = bounds;
 
     dim3 blockDim(BLOCK_SIZE, 1, 1);
-    dim3 gridDim(particleCount / BLOCK_SIZE, 1, 1);
+    dim3 gridDim(particleCount / (BLOCK_SIZE * PARTICLES_PER_THREAD), 1, 1);
 
     if (mouseOnly)
     {

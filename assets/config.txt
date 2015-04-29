@@ -19,7 +19,7 @@ minCalcDistance=.01
 
 # particle config
 particleMass=.01
-particleCountX=128
+particleCountX=256
 particleCountY=128
 friction=2
 
