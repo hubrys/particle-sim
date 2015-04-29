@@ -7,7 +7,7 @@
 #define GRAV_CONST 1
 #define BLOCK_SIZE 256
 #define MIN_CALC_DISTANCE .01f
-#define PARTICLES_PER_THREAD 2
+#define PARTICLES_PER_THREAD 4
 
 __device__ float2 add(float2 lhs, float2 rhs);
 __device__ float length(float2 vec);
