@@ -78,7 +78,7 @@ __global__ void tickNBody(KernelArgs args)
 
 
     // Calculate particle forces
-  /*  __shared__ float4 particles[BLOCK_SIZE];
+    __shared__ float4 particles[BLOCK_SIZE];
     for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
     {
         particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
@@ -91,23 +91,23 @@ __global__ void tickNBody(KernelArgs args)
                 particles[subI].x, particles[subI].y, args.particleMass)
                 );
         }
-    }*/
-
-    float2 diff;
-    float distance;
-    float magnitude;
-    for (int particleI = 0; particleI < args.count; particleI ++)
-    {
-    if (particleI != index)
-    {
-    diff.x = args.particles[particleI].x - particle.x;
-    diff.y = args.particles[particleI].y - particle.y;
-
-    distance = length(diff) + MIN_CALC_DISTANCE;
-    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-    force = add(force, scale(normalize(diff), magnitude));
     }
-    }
+
+    //float2 diff;
+    //float distance;
+    //float magnitude;
+    //for (int particleI = 0; particleI < args.count; particleI ++)
+    //{
+    //if (particleI != index)
+    //{
+    //diff.x = args.particles[particleI].x - particle.x;
+    //diff.y = args.particles[particleI].y - particle.y;
+
+    //distance = length(diff) + MIN_CALC_DISTANCE;
+    //magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
+    //force = add(force, scale(normalize(diff), magnitude));
+    //}
+    //}
 
 
     // Calc resulting velocity
