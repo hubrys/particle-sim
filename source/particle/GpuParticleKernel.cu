@@ -74,41 +74,55 @@ __global__ void tickNBody(KernelArgs args)
     float2 thisPosition = make_float2(particle.x, particle.y);
 
     float2 force = calculateForceMouse(particle.x, particle.y, args.particleMass,
-                                  args.mousePos.x, args.mousePos.y, args.mouseMass);
+                                       args.mousePos.x, args.mousePos.y, args.mouseMass);
 
 
-    // Calculate particle forces
-    __shared__ float4 particles[BLOCK_SIZE];
-    for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
+    //// Calculate particle forces
+    //__shared__ float4 particles[BLOCK_SIZE];
+    //for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
+    //{
+    //    particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
+    //    __syncthreads();
+
+    //    for (int subI = 0; subI < BLOCK_SIZE; subI += 4)
+    //    {
+    //        force = add(force, calculateForce(
+    //            particle.x, particle.y, args.particleMass,
+    //            particles[subI].x, particles[subI].y, args.particleMass)
+    //            );
+
+    //        force = add(force, calculateForce(
+    //            particle.x, particle.y, args.particleMass,
+    //            particles[subI + 1].x, particles[subI + 1].y, args.particleMass)
+    //            );
+
+    //        force = add(force, calculateForce(
+    //            particle.x, particle.y, args.particleMass,
+    //            particles[subI + 2].x, particles[subI + 2].y, args.particleMass)
+    //            );
+
+    //        force = add(force, calculateForce(
+    //            particle.x, particle.y, args.particleMass,
+    //            particles[subI + 3].x, particles[subI + 3].y, args.particleMass)
+    //            );
+    //    }
+    //}
+
+    float2 diff;
+    float distance;
+    float magnitude;
+    for (int particleI = 0; particleI < args.count; particleI ++)
     {
-        particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
-        __syncthreads();
+    if (particleI != index)
+    {
+    diff.x = args.particles[particleI].x - particle.x;
+    diff.y = args.particles[particleI].y - particle.y;
 
-        for (int subI = 0; subI < BLOCK_SIZE; subI++)
-        {
-            force = add(force, calculateForce(
-                particle.x, particle.y, args.particleMass,
-                particles[subI].x, particles[subI].y, args.particleMass)
-                );
-        }
+    distance = length(diff) + MIN_CALC_DISTANCE;
+    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
+    force = add(force, scale(normalize(diff), magnitude));
     }
-
-    //float2 diff;
-    //float distance;
-    //float magnitude;
-    //for (int particleI = 0; particleI < args.count; particleI ++)
-    //{
-    //if (particleI != index)
-    //{
-    //diff.x = args.particles[particleI].x - particle.x;
-    //diff.y = args.particles[particleI].y - particle.y;
-
-    //distance = length(diff) + MIN_CALC_DISTANCE;
-    //magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-    //force = add(force, scale(normalize(diff), magnitude));
-    //}
-    //}
-
+    }
 
     // Calc resulting velocity
     float2 velocity = make_float2(particle.z, particle.w);

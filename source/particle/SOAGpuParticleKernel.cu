@@ -72,34 +72,32 @@ __global__ void tickNBody(SOAKernelArgs args)
     float2 force = calculateForceMouse(position.x, position.y, args.particleMass,
                                   args.mousePos.x, args.mousePos.y, args.mouseMass);
 
-    // Calculate particle forces
-    __shared__ float2 positions[BLOCK_SIZE];
-    for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
-    {
-        positions[threadIdx.x] = args.positions[particleI + threadIdx.x];
-        __syncthreads();
+    //// Calculate particle forces
+    //__shared__ float2 positions[BLOCK_SIZE];
+    //for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
+    //{
+    //    positions[threadIdx.x] = args.positions[particleI + threadIdx.x];
+    //    __syncthreads();
 
-        for (int subI = 0; subI < BLOCK_SIZE; subI++)
-        {
-            force = add(force, calculateForce(
-                position.x, position.y, args.particleMass,
-                positions[subI].x, positions[subI].y, args.particleMass)
-                );
-        }
-    }
+    //    for (int subI = 0; subI < BLOCK_SIZE; subI++)
+    //    {
+    //        force = add(force, calculateForce(
+    //            position.x, position.y, args.particleMass,
+    //            positions[subI].x, positions[subI].y, args.particleMass)
+    //            );
+    //    }
+    //}
 
-    /*for (int particleI = 0; particleI < args.count; particleI ++)
+    for (int particleI = 0; particleI < args.count; particleI ++)
     {
     if (particleI != index)
     {
-    diff.x = args.particles[particleI].x - particle.x;
-    diff.y = args.particles[particleI].y - particle.y;
-
-    distance = length(diff) + MIN_CALC_DISTANCE;
-    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-    force = add(force, scale(normalize(diff), magnitude));
+        force = add(force, calculateForce(
+                        position.x, position.y, args.particleMass,
+                        args.positions[particleI].x, args.positions[particleI].y, args.particleMass)
+                        );
     }
-    }*/
+    }
 
 
     // Calc resulting velocity
