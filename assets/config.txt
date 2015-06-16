@@ -29,4 +29,4 @@ mouseOnly=0
 
 # calculation config
 # managerTypes: cpuPair, cpuStepped, gpuPair, gpuSOA
-particleManager=gpuSOA
+particleManager=gpuPair

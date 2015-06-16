@@ -5,7 +5,7 @@
 #include "cuda_runtime.h"
 
 #define GRAV_CONST 1
-#define BLOCK_SIZE 256
+#define BLOCK_SIZE 64
 #define MIN_CALC_DISTANCE .01f
 
 __device__ float2 add(float2 lhs, float2 rhs);

@@ -5,7 +5,6 @@
 
 typedef struct
 {
-    float4* particles;
     int count;
     float deltaTime;
     float particleMass;
@@ -15,10 +14,10 @@ typedef struct
     float2 bounds;
 } KernelArgs;
 
-__global__ void tickMouseOnly(KernelArgs args)
+__global__ void tickMouseOnly(const float4* input, float4* output, KernelArgs args)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    float4 particle = args.particles[index];
+    float4 particle = input[index];
 
     float2 velocity = scale(
         calculateForceMouse(particle.x, particle.y, args.particleMass, args.mousePos.x, args.mousePos.y, args.mouseMass),
@@ -63,14 +62,14 @@ __global__ void tickMouseOnly(KernelArgs args)
 
     velocity = scale(velocity, 1 - (args.friction * args.deltaTime));
 
-    args.particles[index] = make_float4(position.x, position.y,
+    output[index] = make_float4(position.x, position.y,
                                         velocity.x, velocity.y);
 }
 
-__global__ void tickNBody(KernelArgs args)
+__global__ void tickNBody(const float4* __restrict__ input, float4* __restrict__ output, KernelArgs args)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    float4 particle = args.particles[index];
+    float4 particle = input[index];
     float2 thisPosition = make_float2(particle.x, particle.y);
 
     float2 force = calculateForceMouse(particle.x, particle.y, args.particleMass,
@@ -81,30 +80,30 @@ __global__ void tickNBody(KernelArgs args)
     //__shared__ float4 particles[BLOCK_SIZE];
     //for (int particleI = 0; particleI < args.count; particleI += BLOCK_SIZE)
     //{
-    //    particles[threadIdx.x] = args.particles[particleI + threadIdx.x];
+    //    particles[threadIdx.x] = args.input[particleI + threadIdx.x];
     //    __syncthreads();
 
-    //    for (int subI = 0; subI < BLOCK_SIZE; subI += 4)
+    //    for (int subI = 0; subI < BLOCK_SIZE; subI += 1)
     //    {
     //        force = add(force, calculateForce(
     //            particle.x, particle.y, args.particleMass,
     //            particles[subI].x, particles[subI].y, args.particleMass)
     //            );
 
-    //        force = add(force, calculateForce(
-    //            particle.x, particle.y, args.particleMass,
-    //            particles[subI + 1].x, particles[subI + 1].y, args.particleMass)
-    //            );
+    //        //force = add(force, calculateForce(
+    //        //    particle.x, particle.y, args.particleMass,
+    //        //    particles[subI + 1].x, particles[subI + 1].y, args.particleMass)
+    //        //    );
 
-    //        force = add(force, calculateForce(
-    //            particle.x, particle.y, args.particleMass,
-    //            particles[subI + 2].x, particles[subI + 2].y, args.particleMass)
-    //            );
+    //        //force = add(force, calculateForce(
+    //        //    particle.x, particle.y, args.particleMass,
+    //        //    particles[subI + 2].x, particles[subI + 2].y, args.particleMass)
+    //        //    );
 
-    //        force = add(force, calculateForce(
-    //            particle.x, particle.y, args.particleMass,
-    //            particles[subI + 3].x, particles[subI + 3].y, args.particleMass)
-    //            );
+    //        //force = add(force, calculateForce(
+    //        //    particle.x, particle.y, args.particleMass,
+    //        //    particles[subI + 3].x, particles[subI + 3].y, args.particleMass)
+    //        //    );
     //    }
     //}
 
@@ -113,15 +112,15 @@ __global__ void tickNBody(KernelArgs args)
     float magnitude;
     for (int particleI = 0; particleI < args.count; particleI ++)
     {
-    if (particleI != index)
-    {
-    diff.x = args.particles[particleI].x - particle.x;
-    diff.y = args.particles[particleI].y - particle.y;
+        if (particleI != index)
+        {
+        diff.x = input[particleI].x - particle.x;
+        diff.y = input[particleI].y - particle.y;
 
-    distance = length(diff) + MIN_CALC_DISTANCE;
-    magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
-    force = add(force, scale(normalize(diff), magnitude));
-    }
+        distance = length(diff) + MIN_CALC_DISTANCE;
+        magnitude = (GRAV_CONST * args.particleMass * args.particleMass) / (distance * distance);
+        force = add(force, scale(normalize(diff), magnitude));
+        }
     }
 
     // Calc resulting velocity
@@ -161,13 +160,13 @@ __global__ void tickNBody(KernelArgs args)
 
     velocity = scale(velocity, 1 - args.friction * args.deltaTime);
 
-    args.particles[index] = make_float4(position.x, position.y,
+    output[index] = make_float4(position.x, position.y,
                                         velocity.x, velocity.y);
 }
 
 
 void launchCudaTick(float deltaTime, float particleMass, float mouseX, float mouseY, float mouseMass,
-struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount, float2 bounds, float friction)
+struct cudaGraphicsResource* particleResource, bool sourceBufferFirst, bool mouseOnly, int particleCount, float2 bounds, float friction)
 {
     size_t numBytes;
     KernelArgs args;
@@ -186,7 +185,6 @@ struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount
         exit(0);
     }
 
-    args.particles = particles;
     args.count = particleCount;
     args.deltaTime = deltaTime;
     args.particleMass = particleMass;
@@ -200,11 +198,15 @@ struct cudaGraphicsResource* particleResource, bool mouseOnly, int particleCount
 
     if (mouseOnly)
     {
-        tickMouseOnly<<<gridDim, blockDim>>>(args);
+        tickMouseOnly<<<gridDim, blockDim>>>(&particles[sourceBufferFirst ? 0 : particleCount],
+                                             &particles[sourceBufferFirst ? particleCount : 0],
+                                             args);
     }
     else
     {
-        tickNBody<<<gridDim, blockDim>>>(args);
+        tickNBody<<<gridDim, blockDim>>>(&particles[sourceBufferFirst ? 0 : particleCount],
+                                         &particles[sourceBufferFirst ? particleCount : 0],
+                                         args);
     }
 
     cudaDeviceSynchronize();
